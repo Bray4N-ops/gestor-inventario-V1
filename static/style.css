@@ -117,7 +117,7 @@ body {
 }
 
 .btn-success {
-    background-color: var(--green-field);
+    background-color:var(--orange-warning);
     color: #ffffff;
 }
 .btn-success:hover {
@@ -169,7 +169,7 @@ body {
 
 .form-control:focus, .form-select:focus {
     background-color: #ffffff;
-    color: var(--text-primary);
+    color: black;
     border-color: var(--accent-primary);
     box-shadow: 0 0 0 0.2rem rgba(200, 161, 91, 0.20);
     outline: none;
