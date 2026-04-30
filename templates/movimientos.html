@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Historial de Movimientos{% endblock %}
+{% block content %}
+<h2>Últimos movimientos</h2>
+<div class="mb-3">
+    <span class="badge bg-success me-2">Entrada</span>
+    <span class="badge bg-danger me-2">Salida</span>
+    
+</div>
+
+{% if movimientos %}
+    <table class="table">
+        <thead>
+            <tr><th>ID</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Usuario</th><th>Fecha</th><th>Observación</th></tr>
+        </thead>
+        <tbody>
+            {% for m in movimientos %}
+            <tr class="{% if m['tipo'] == 'entrada' %}movimiento-entrada{% else %}movimiento-salida{% endif %}">
+                <td>{{ m['id'] }}</td>
+                <td>
+                    {% set prod = service_inventario.obtener_producto_por_id(m['producto_id']) %}
+                    {{ prod['nombre'] if prod else 'Producto #' + m['producto_id']|string }}</td>
+                </td>
+                <td>{{ m['tipo'] }}</td>
+                <td>{{ m['cantidad'] }}</td>
+                <td>{{ m['usuario'] }}</td>
+                <td>{{ m['fecha'] }}</td>
+                <td>{{ m['observacion'] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-info">No hay movimientos aún.</div>
+{% endif %}
+{% endblock %}

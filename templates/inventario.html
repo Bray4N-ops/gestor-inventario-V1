@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block title %}Inventario{% endblock %}
+{% block content %}
+<h2>Inventario actual</h2>
+<form method="get" class="row g-3 mb-3" id="filtro-form">
+    <div class="col-auto">
+        <select name="categoria" class="form-select" onchange="this.form.submit()">
+            {% for cat in categorias %}
+                <option value="{{ cat }}" {% if cat == filtro_cat_actual %}selected{% endif %}>
+                    {{ cat.capitalize() }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto position-relative">
+        <input type="text" id="busqueda" name="busqueda" class="form-control" 
+               placeholder="Buscar producto..." autocomplete="off" value="{{ busqueda }}">
+        <div id="sugerencias" class="autocomplete-list" style="display:none;"></div>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">Buscar</button>
+        <a href="{{ url_for('inventario_view') }}" class="btn btn-secondary">Limpiar</a>
+    </div>
+</form>
+
+{% if productos %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Cantidad</th>
+                <th>Unidad</th>
+                <th>Lote</th>
+                <th>Ubicación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for p in productos %}
+                <tr class="{% if p['cantidad'] < p['stock_minimo'] %}table-danger{% endif %}">
+                    <td>{{ p['id'] }}</td>
+                    <td>{{ p['nombre'] }}</td>
+                    <td>{{ p['categoria'] }}</td>
+                    <td>{{ p['cantidad'] }}</td>
+                    <td>{{ p['unidad'] }}</td>
+                    <td>{{ p['lote'] or '' }}</td>
+                    <td>{{ p['ubicacion'] or '' }}</td>
+                    <td>
+                        <a href="/producto/editar/{{ p['id'] }}" class="btn btn-sm btn-warning">✏️ Editar</a>
+                        <a href="/producto/eliminar/{{ p['id'] }}" 
+                        class="btn btn-sm btn-danger"  onclick="return confirm('¿Eliminar este producto?')">🗑️ Eliminar</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <div class="alert alert-info">No hay productos que coincidan.</div>
+{% endif %}
+
+<hr>
+<h3>Registrar movimiento rápido</h3>
+<form method="post" action="{{ url_for('registrar_movimiento_view') }}" class="row g-3">
+    <div class="col-auto position-relative">
+        <input type="text" id="producto_nombre" class="form-control" 
+               placeholder="Nombre del producto" autocomplete="off" required>
+        <input type="hidden" name="producto_id" id="producto_id">
+        <div id="sugerencias_mov" class="autocomplete-list" style="display:none;"></div>
+    </div>
+    <div class="col-auto">
+        <select name="tipo" class="form-select" required>
+            <option value="entrada">Entrada</option>
+            <option value="salida">Salida</option>
+        </select>
+    </div>
+    <div class="col-auto">
+        <input type="number" step="0.1" name="cantidad" class="form-control" placeholder="Cantidad" required>
+    </div>
+    <div class="col-auto">
+        <input type="text" name="observacion" class="form-control" placeholder="Observación">
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-warning">Registrar</button>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Autocompletado para búsqueda de inventario
+const busquedaInput = document.getElementById('busqueda');
+const sugerenciasDiv = document.getElementById('sugerencias');
+
+busquedaInput.addEventListener('input', function() {
+    const q = this.value;
+    if (q.length < 1) {
+        sugerenciasDiv.style.display = 'none';
+        return;
+    }
+    fetch(`/api/productos?q=${encodeURIComponent(q)}`)
+        .then(res => res.json())
+        .then(data => {
+            sugerenciasDiv.innerHTML = '';
+            if (data.length === 0) {
+                sugerenciasDiv.style.display = 'none';
+                return;
+            }
+            data.forEach(prod => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.textContent = prod.nombre;
+                item.addEventListener('click', function() {
+                    busquedaInput.value = prod.nombre;
+                    sugerenciasDiv.style.display = 'none';
+                    // Opcional: enviar formulario automáticamente
+                    document.getElementById('filtro-form').submit();
+                });
+                sugerenciasDiv.appendChild(item);
+            });
+            sugerenciasDiv.style.display = 'block';
+        });
+});
+
+// Ocultar sugerencias al hacer clic fuera
+document.addEventListener('click', function(e) {
+    if (e.target !== busquedaInput) {
+        sugerenciasDiv.style.display = 'none';
+    }
+});
+
+// Autocompletado para movimiento rápido
+const prodNombreInput = document.getElementById('producto_nombre');
+const prodIdHidden = document.getElementById('producto_id');
+const sugerenciasMovDiv = document.getElementById('sugerencias_mov');
+
+prodNombreInput.addEventListener('input', function() {
+    const q = this.value;
+    if (q.length < 1) {
+        sugerenciasMovDiv.style.display = 'none';
+        return;
+    }
+    fetch(`/api/productos?q=${encodeURIComponent(q)}`)
+        .then(res => res.json())
+        .then(data => {
+            sugerenciasMovDiv.innerHTML = '';
+            if (data.length === 0) {
+                sugerenciasMovDiv.style.display = 'none';
+                return;
+            }
+            data.forEach(prod => {
+                const item = document.createElement('div');
+                item.className = 'autocomplete-item';
+                item.textContent = `${prod.nombre} (${prod.unidad})`;
+                item.addEventListener('click', function() {
+                    prodNombreInput.value = prod.nombre;
+                    prodIdHidden.value = prod.id;
+                    sugerenciasMovDiv.style.display = 'none';
+                });
+                sugerenciasMovDiv.appendChild(item);
+            });
+            sugerenciasMovDiv.style.display = 'block';
+        });
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target !== prodNombreInput) {
+        sugerenciasMovDiv.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

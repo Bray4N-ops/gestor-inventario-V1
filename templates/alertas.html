@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Alertas de Stock Bajo{% endblock %}
+{% block content %}
+<h2>⚠️ Productos bajo el nivel mínimo</h2>
+{% if productos %}
+    {% for p in productos %}
+    <div class="alert-card">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="producto-nombre">{{ p['nombre'] }}</div>
+                <div class="detalle">Categoría: {{ p['categoria'] }}</div>
+                <div class="detalle">Ubicación: {{ p['ubicacion'] or 'No especificada' }}</div>
+            </div>
+            <div class="col-md-3 text-center">
+                <div style="font-size: 2rem; font-weight: bold; color: var(--red-bright);">
+                    {{ p['cantidad'] }}
+                </div>
+                <small>{{ p['unidad'] }}</small>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="alert-stock-label">Stock mínimo</div>
+                <div class="alert-stock-value">{{ p['stock_minimo'] }}</div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="alert alert-success">🎉 Todos los productos están sobre el mínimo.</div>
+{% endif %}
+{% endblock %}

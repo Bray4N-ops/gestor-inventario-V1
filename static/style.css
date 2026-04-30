@@ -1,0 +1,248 @@
+/* static/style.css */
+:root {
+--bg-primary: #1b2a22;
+--bg-secondary: #22362b;
+--bg-card: #1f3127;
+
+--text-primary: #f2f2f2;
+--text-secondary: #b4bdb4;
+
+--accent-primary: #d4b06a;
+--accent-hover: #e2c07a;
+
+--green-field: #2ecc71;
+--red-alert: #ff3b30;
+--orange-warning: #7a5d35;
+
+--border-color: #314a3c;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    letter-spacing: 0.3px;
+}
+
+/* --- NAVBAR --- */
+.navbar {
+    background-color: var(--bg-secondary) !important;
+    border-bottom: 2px solid var(--accent-primary);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.navbar-brand {
+    color: var(--accent-primary) !important;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.nav-link {
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover, .nav-link.active {
+    background-color: rgba(200, 161, 91, 0.18) !important;
+    color: #2f2b25 !important;
+    border-radius: 6px;
+}
+
+/* --- TARJETAS --- */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+/* --- TABLAS --- */
+.table {
+    color: var(--text-primary) !important;
+    background-color: var(--bg-card) !important;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-bottom: 0;
+    border: 1px solid var(--border-color);
+}
+
+.table th, .table td {
+    border: 1px solid var(--border-color) !important;
+    vertical-align: middle;
+}
+
+.table thead {
+    background-color: var(--bg-secondary);
+}
+
+.table thead th {
+    color: #4a3e2c;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color) !important;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(200, 161, 91, 0.12) !important;
+}
+
+/* --- BOTONES --- */
+.btn {
+    border-radius: 7px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    transition: all 0.2s ease;
+    border: none;
+    font-size: 0.9rem;
+    padding: 0.45rem 0.85rem;
+}
+
+.btn-primary {
+    background-color: var(--accent-primary);
+    color: #2f2b25;
+}
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+    color: #2f2b25;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(200, 161, 91, 0.25);
+}
+
+.btn-success {
+    background-color: var(--green-field);
+    color: #ffffff;
+}
+.btn-success:hover {
+    background-color: var(--green-bright);
+    transform: translateY(-1px);
+}
+
+.btn-warning {
+    background-color: var(--orange-warning);
+    color: #ffffff;
+}
+.btn-warning:hover {
+    background-color: #d39a58;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background-color: var(--red-alert);
+    color: #ffffff;
+}
+.btn-danger:hover {
+    background-color: var(--red-bright);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+.btn-secondary:hover {
+    background-color: #d9d0c0;
+    color: var(--text-primary);
+}
+
+/* --- INPUTS Y SELECTS --- */
+.form-control, .form-select {
+    background-color: #fdfcf8;
+    color: #2f2b25;               /* texto oscuro para contraste */
+    border: 1px solid var(--border-color);
+    border-radius: 7px;
+    padding: 0.55rem 0.85rem;
+    transition: all 0.3s ease;
+}
+
+.form-control::placeholder {
+    color: #6b6b6b;               /* gris medio, visible sobre fondo claro */
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #ffffff;
+    color: var(--text-primary);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 0.2rem rgba(200, 161, 91, 0.20);
+    outline: none;
+}
+
+/* --- MOVIMIENTOS EN LA TABLA --- */
+tr.movimiento-entrada td {
+    background-color: rgba(46, 204, 113, 0.20) !important;
+    border-left: 5px solid var(--green-field) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+tr.movimiento-salida td {
+    background-color: rgba(255, 59, 48, 0.20) !important;
+    border-left: 5px solid var(--red-alert) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+/* --- ALERTAS DE STOCK --- */
+.alert-card {
+    background-color: rgba(230, 15, 15, 0.1);
+    border: 1px solid rgba(176, 107, 90, 0.25);
+    border-left: 6px solid var(--red-alert);
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.alert-card .producto-nombre {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--red-alert);
+}
+
+.alert-card .detalle {
+    font-size: 1.05rem;
+    color: var(--text-primary);
+    margin-top: 5px;
+}
+
+.alert-stock-label {
+    color: var(--text-secondary);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.alert-stock-value {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--red-alert);
+}
+
+/* Auto-completado */
+.autocomplete-list {
+    background-color: #ffffff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.autocomplete-item {
+    color: var(--text-primary);
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.autocomplete-item:hover {
+    background-color: rgba(200, 161, 91, 0.20);
+    color: #2f2b25;
+    transition: all 0.2s ease;
+}

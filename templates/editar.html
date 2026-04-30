@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Editar Producto{% endblock %}
+{% block content %}
+<h2>Editar producto</h2>
+<form method="post">
+    <input type="hidden" name="id" value="{{ producto['id'] }}">
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Nombre*</label>
+            <input type="text" name="nombre" class="form-control" value="{{ producto['nombre'] }}" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Categoría*</label>
+            <select name="categoria" class="form-select" required>
+                <option value="">Seleccionar...</option>
+                <option value="medicamento" {% if producto['categoria'] == 'medicamento' %}selected{% endif %}>Medicamento</option>
+                <option value="alimento" {% if producto['categoria'] == 'alimento' %}selected{% endif %}>Alimento</option>
+                <option value="herramienta" {% if producto['categoria'] == 'herramienta' %}selected{% endif %}>Herramienta</option>
+                <option value="maquinaria" {% if producto['categoria'] == 'maquinaria' %}selected{% endif %}>Maquinaria</option>
+            </select>
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Cantidad</label>
+            <input type="number" step="0.1" name="cantidad" class="form-control" value="{{ producto['cantidad'] }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Unidad</label>
+            <input type="text" name="unidad" class="form-control" value="{{ producto['unidad'] }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Stock mínimo</label>
+            <input type="number" name="stock_minimo" class="form-control" value="{{ producto['stock_minimo'] }}">
+        </div>
+    </div>
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label class="form-label">Lote</label>
+            <input type="text" name="lote" class="form-control" value="{{ producto['lote'] or '' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Fecha de vencimiento</label>
+            <input type="date" name="fecha_vencimiento" class="form-control" value="{{ producto['fecha_vencimiento'] or '' }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label">Ubicación</label>
+            <input type="text" name="ubicacion" class="form-control" value="{{ producto['ubicacion'] or '' }}">
+        </div>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Notas</label>
+        <textarea name="notas" class="form-control" rows="2">{{ producto['notas'] or '' }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-success">Guardar cambios</button>
+    <a href="{{ url_for('inventario_view') }}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
