@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Agente Leo - Chat{% endblock %}
+{% block content %}
+<h2>🤖 Habla con el Agente Leo</h2>
+
+<!-- Mostrar historial -->
+<div class="mb-4" style="max-height: 400px; overflow-y: auto; background: #2b241f; padding: 15px; border-radius: 10px;">
+    {% for turno in historial %}
+    <div class="mb-3">
+        <strong class="text-info">Tú:</strong> {{ turno['usuario'] }}
+    </div>
+    <div class="mb-3">
+        <strong class="text-success">Leo:</strong> {{ turno['respuesta'] }}
+    </div>
+    <hr class="border-secondary">
+{% endfor %}
+</div>
+
+<form method="post" class="mb-3">
+    <div class="input-group">
+        <input type="text" name="mensaje" class="form-control" placeholder="Ej: ¿cuántas dosis de vacuna aftosa quedan?" required autofocus>
+        <button type="submit" class="btn btn-primary">Enviar</button>
+    </div>
+</form>
+
+{% if respuesta %}
+    <div class="alert alert-info">{{ respuesta }}</div>
+{% endif %}
+{% endblock %}
