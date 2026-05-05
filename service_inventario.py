@@ -1,19 +1,6 @@
 import sqlite3 
 from db import get_connection #viene de tu archivo db.py y sirve para abrir la conexión a la base de datos.
 
-def buscar_producto_flexible(texto):
-    texto = texto.strip()
-    # Si el texto es un número entero, buscar por ID
-    if texto.isdigit():
-        producto_id = int(texto)
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("SELECT * FROM productos WHERE id = ?", (producto_id,))
-        prod = cursor.fetchone()
-        conn.close()
-        if prod:
-            return dict(prod)
-    # ... resto de la función (pasar a minúsculas, etc.)
 
 def agregar_producto(nombre, categoria, cantidad=0, unidad='unidad', stock_minimo=0, lote=None, fecha_vencimiento=None, ubicacion=None, notas=None):
     conn = get_connection()
@@ -83,21 +70,30 @@ def obtener_movimientos(producto_id=None):
     return movs
 
 def buscar_producto_flexible(texto):
-    """Busca un producto por coincidencia insensible a mayúsculas/minúsculas y espacios.
-    Retorna el producto si encuentra uno solo, o None."""
-    texto = texto.strip().lower()
+    """Busca un producto por ID numérico, igualdad exacta (sin importar mayúsculas)
+    o coincidencia parcial. Retorna el producto si encuentra uno solo, o None."""
+    texto = texto.strip()
+    # Si el texto es un número entero, buscar directamente por ID
+    if texto.isdigit():
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM productos WHERE id = ?", (int(texto),))
+        prod = cursor.fetchone()
+        conn.close()
+        return dict(prod) if prod else None
+
+    texto_lower = texto.lower()
     conn = get_connection()
     cursor = conn.cursor()
     # Primero intenta igualdad exacta sin importar capitalización
-    cursor.execute("SELECT * FROM productos WHERE LOWER(TRIM(nombre)) = ?", (texto,))
+    cursor.execute("SELECT * FROM productos WHERE LOWER(TRIM(nombre)) = ?", (texto_lower,))
     producto = cursor.fetchone()
     if producto:
         conn.close()
         return dict(producto)
-    
-    
+
     # Si no, busca productos que contengan el texto
-    cursor.execute("SELECT * FROM productos WHERE LOWER(nombre) LIKE ?", (f'%{texto}%',))
+    cursor.execute("SELECT * FROM productos WHERE LOWER(nombre) LIKE ?", (f'%{texto_lower}%',))
     resultados = cursor.fetchall()
     conn.close()
     if len(resultados) == 1:

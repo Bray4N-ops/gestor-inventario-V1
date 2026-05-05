@@ -1,7 +1,11 @@
 import sqlite3
+import os
+
+# Ruta absoluta al lado de este archivo para evitar problemas con el cwd
+_DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "inventario.db")
 
 def get_connection():
-    conn = sqlite3.connect("inventario.db")
+    conn = sqlite3.connect(_DB_PATH)
     conn.row_factory = sqlite3.Row  # Para acceder a columnas por nombre
     return conn
 
@@ -22,10 +26,16 @@ def init_db():
             fecha_vencimiento TEXT,
             ubicacion TEXT,
             notas TEXT,
+            activo INTEGER DEFAULT 1,
             fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    #cursor.execute("ALTER TABLE productos ADD COLUMN activo INTEGER DEFAULT 1")
+    # Migración segura: agrega la columna activo si ya existe la tabla sin ella
+    try:
+        cursor.execute("ALTER TABLE productos ADD COLUMN activo INTEGER DEFAULT 1")
+        cursor.execute("UPDATE productos SET activo = 1 WHERE activo IS NULL")
+    except Exception:
+        pass  # La columna ya existe
     
     # Tabla de movimientos (historial)
     cursor.execute('''

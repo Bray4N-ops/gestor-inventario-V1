@@ -1,10 +1,13 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+import os
+from dotenv import load_dotenv
+load_dotenv()
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from db import init_db
 import service_inventario as inventario
-import agente
+import agente_gemini as agente
 
 app = Flask(__name__)
-app.secret_key = 'clave-secreta-cambiar-en-produccion'  # Necesaria para sesiones y flash
+app.secret_key = os.getenv('FLASK_SECRET_KEY', 'clave-secreta-cambiar-en-produccion')
 
 # Inicializar la base de datos al arrancar
 init_db()
@@ -136,10 +139,10 @@ def alertas_view():
 def api_productos():
     q = request.args.get('q', '')
     if len(q) < 1:
-        return []
+        return jsonify([])
     productos = inventario.obtener_productos()
     sugerencias = [p for p in productos if q.lower() in p['nombre'].lower()]
-    return [{'id': p['id'], 'nombre': p['nombre'], 'unidad': p['unidad']} for p in sugerencias[:10]]
+    return jsonify([{'id': p['id'], 'nombre': p['nombre'], 'unidad': p['unidad']} for p in sugerencias[:10]])
 
 # ---- Chat con el agente IA ----
 @app.route('/chat', methods=['GET', 'POST'])
