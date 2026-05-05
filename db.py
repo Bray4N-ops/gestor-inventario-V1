@@ -30,12 +30,11 @@ def init_db():
             fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    # Migración segura: agrega la columna activo si ya existe la tabla sin ella
-    try:
+    # Verificar si la columna 'activo' ya existe antes de agregarla
+    cursor.execute("PRAGMA table_info(productos)")
+    columnas = [col['name'] for col in cursor.fetchall()]
+    if 'activo' not in columnas:
         cursor.execute("ALTER TABLE productos ADD COLUMN activo INTEGER DEFAULT 1")
-        cursor.execute("UPDATE productos SET activo = 1 WHERE activo IS NULL")
-    except Exception:
-        pass  # La columna ya existe
     
     # Tabla de movimientos (historial)
     cursor.execute('''

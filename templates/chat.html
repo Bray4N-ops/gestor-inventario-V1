@@ -4,26 +4,154 @@
 <h2>🤖 Habla con el Agente Leo</h2>
 
 <!-- Mostrar historial -->
-<div class="mb-4" style="max-height: 400px; overflow-y: auto; background: #2b241f; padding: 15px; border-radius: 10px;">
+<div class="mb-4" id="chatContainer" style="max-height: 400px; overflow-y: auto; background: #2b241f; padding: 15px; border-radius: 10px; scroll-behavior: smooth;">
     {% for turno in historial %}
-    <div class="mb-3">
-        <strong class="text-info">Tú:</strong> {{ turno['usuario'] }}
+    <div class="mb-3" {% if loop.last %}style="animation: fadeIn 0.8s ease-out; background: rgba(255,255,255,0.08); padding: 12px; border-radius: 8px; border-left: 4px solid #198754;"{% endif %}>
+        <div class="mb-2">
+            <strong class="text-info">Tú:</strong> {{ turno['usuario'] }}
+        </div>
+        <div>
+            <strong class="text-success">Leo:</strong> {{ turno['respuesta'] }}
+        </div>
     </div>
-    <div class="mb-3">
-        <strong class="text-success">Leo:</strong> {{ turno['respuesta'] }}
-    </div>
-    <hr class="border-secondary">
-{% endfor %}
+    {% if not loop.last %}<hr class="border-secondary">{% endif %}
+    {% endfor %}
 </div>
 
-<form method="post" class="mb-3">
+<form method="post" class="mb-3" id="chatForm">
     <div class="input-group">
-        <input type="text" name="mensaje" class="form-control" placeholder="Ej: ¿cuántas dosis de vacuna aftosa quedan?" required autofocus>
+        <input type="text" id="mensajeInput" name="mensaje" class="form-control" placeholder="Ej: ¿cuántas dosis de vacuna aftosa quedan?" required autofocus>
+        <button type="button" id="btnMic" class="btn btn-secondary" title="Hablar por micrófono">🎙️</button>
+        <button type="button" id="btnStopAudio" class="btn btn-warning" title="Detener lectura en voz alta" style="display: none;">🔇</button>
         <button type="submit" class="btn btn-primary">Enviar</button>
     </div>
 </form>
 
 {% if respuesta %}
-    <div class="alert alert-info">{{ respuesta }}</div>
+    <div class="alert alert-info" style="display: none;">{{ respuesta }}</div>
 {% endif %}
+
+<script>
+    // 1. Auto-scroll al final del chat para ver el mensaje más reciente
+    const chatContainer = document.getElementById("chatContainer");
+    if(chatContainer) {
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // 2. TEXT-TO-SPEECH (Leo hablando)
+    const btnStopAudio = document.getElementById("btnStopAudio");
+    
+    // Si hay una respuesta nueva de Leo, la reproducimos en voz alta
+    {% if respuesta %}
+    const respuestaLeo = {{ respuesta | tojson }};
+    const ultimoLeido = sessionStorage.getItem('ultimoMensajeLeido');
+
+    // Comparamos con sessionStorage para evitar que lo vuelva a leer al refrescar la página con F5
+    if (respuestaLeo && respuestaLeo !== ultimoLeido && window.speechSynthesis) {
+        sessionStorage.setItem('ultimoMensajeLeido', respuestaLeo);
+        
+        // Cancelar cualquier audio anterior
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(respuestaLeo);
+        utterance.lang = 'es-MX'; // Idioma español
+        utterance.rate = 1.0;     // Velocidad normal
+        
+        // Mostrar botón de detener mientras habla
+        if (btnStopAudio) {
+            btnStopAudio.style.display = "inline-block";
+            
+            utterance.onend = () => {
+                btnStopAudio.style.display = "none";
+            };
+            
+            utterance.onerror = () => {
+                btnStopAudio.style.display = "none";
+            };
+            
+            btnStopAudio.onclick = () => {
+                window.speechSynthesis.cancel();
+                btnStopAudio.style.display = "none";
+            };
+        }
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    {% endif %}
+
+    // 3. SPEECH-TO-TEXT (Reconocimiento de voz)
+    const btnMic = document.getElementById("btnMic");
+    const mensajeInput = document.getElementById("mensajeInput");
+    const chatForm = document.getElementById("chatForm");
+
+    // Verificar si el navegador soporta la API de reconocimiento de voz
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        
+        recognition.lang = 'es-MX';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        let escuchando = false;
+
+        btnMic.addEventListener("click", () => {
+            if (escuchando) {
+                recognition.stop();
+                return;
+            }
+            recognition.start();
+        });
+
+        recognition.onstart = () => {
+            escuchando = true;
+            btnMic.classList.remove("btn-secondary");
+            btnMic.classList.add("btn-danger"); // Botón rojo = grabando
+            mensajeInput.placeholder = "Escuchando tu voz...";
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            mensajeInput.value = transcript;
+            // Opcional: Descomenta la siguiente línea para que se envíe automáticamente al terminar de hablar
+            // chatForm.submit();
+        };
+
+        recognition.onspeechend = () => {
+            recognition.stop();
+        };
+
+        recognition.onend = () => {
+            escuchando = false;
+            btnMic.classList.remove("btn-danger");
+            btnMic.classList.add("btn-secondary");
+            mensajeInput.placeholder = "Ej: ¿cuántas dosis de vacuna aftosa quedan?";
+            
+            // Si el input tiene texto después de grabar, enviar automáticamente
+            if(mensajeInput.value.trim() !== "") {
+                chatForm.submit();
+            }
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Error de reconocimiento de voz:", event.error);
+            escuchando = false;
+            btnMic.classList.remove("btn-danger");
+            btnMic.classList.add("btn-secondary");
+            mensajeInput.placeholder = "Error al escuchar. Intenta escribir.";
+        };
+    } else {
+        // Ocultar botón si no hay soporte (ej. Firefox sin configuración o navegadores antiguos)
+        btnMic.style.display = "none";
+        console.warn("La API de reconocimiento de voz no está soportada en este navegador.");
+    }
+</script>
+
+<style>
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+</style>
 {% endblock %}

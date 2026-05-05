@@ -1,3 +1,6 @@
+# Variables de entorno y secretos
+.env
+
 # Entorno virtual
 venv/
 env/
