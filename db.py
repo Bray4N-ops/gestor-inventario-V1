@@ -25,7 +25,12 @@ def init_db():
             fecha_agregado TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
-    #cursor.execute("ALTER TABLE productos ADD COLUMN activo INTEGER DEFAULT 1")
+    
+    # Verificar si la columna 'activo' ya existe antes de agregarla
+    cursor.execute("PRAGMA table_info(productos)")
+    columnas = [col['name'] for col in cursor.fetchall()]
+    if 'activo' not in columnas:
+        cursor.execute("ALTER TABLE productos ADD COLUMN activo INTEGER DEFAULT 1")
     
     # Tabla de movimientos (historial)
     cursor.execute('''

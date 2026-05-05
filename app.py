@@ -43,7 +43,7 @@ def agregar_producto_view():
         categoria = request.form['categoria']
         cantidad = float(request.form.get('cantidad', 0) or 0)
         unidad = request.form.get('unidad', 'unidad')
-        stock_minimo = int(request.form.get('stock_minimo', 0) or 0)
+        stock_minimo = int(float(request.form.get('stock_minimo', 0) or 0))
         lote = request.form.get('lote', '')
         fecha_venc = request.form.get('fecha_vencimiento', '')
         ubicacion = request.form.get('ubicacion', '')
@@ -75,7 +75,7 @@ def editar_producto(id):
         categoria = request.form['categoria']
         cantidad = float(request.form.get('cantidad', 0) or 0)
         unidad = request.form.get('unidad', 'unidad')
-        stock_minimo = int(request.form.get('stock_minimo', 0) or 0)
+        stock_minimo = int(float(request.form.get('stock_minimo', 0) or 0))
         lote = request.form.get('lote', '')
         fecha_venc = request.form.get('fecha_vencimiento', '')
         ubicacion = request.form.get('ubicacion', '')
